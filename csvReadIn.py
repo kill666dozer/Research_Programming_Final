@@ -12,12 +12,14 @@ from tkinter import filedialog
 
 
 def load_csv():
+    """Prompts the user to find a csv to load in"""
     file_path = filedialog.askopenfilename()
     data = np.loadtxt(open(file_path, "rb"), delimiter=",")
     return data
 
 
 def list_uncertainties(data):
+    """Returns a list of uncertainties mined from a coordAmp dataset"""
     maxUncertainty = .3
     uncertainties = []
     for row in data:
@@ -28,6 +30,7 @@ def list_uncertainties(data):
 
 
 def make_coordAmp_dataframe(npArray):
+    """Creates a labelled dataframe for the coordAmp dataset"""
     columnNames = []
     i = 0
     for cells in npArray[0, ::8]:
@@ -45,6 +48,7 @@ def make_coordAmp_dataframe(npArray):
 
 
 def make_seq_dataframe(npArray):
+    """Creates a labelled dataframe for the SeqOfEvents dataset"""
     columnNames = ['Frame Index', 'Start/End', 'Track Index', 'Merge/Split']
     infoFrame = pd.DataFrame(npArray, index=range(0, npArray.shape[0]),
                              columns=columnNames)
@@ -52,6 +56,7 @@ def make_seq_dataframe(npArray):
 
 
 def make_featIndx_dataframe(npArray):
+    """Creates a labelled dataframe for the featIndx dataset"""
     columnNames = []
     i = 0
     for columns in npArray[0]:
@@ -70,6 +75,7 @@ def make_featIndx_dataframe(npArray):
 #    yMask = yUncertainties[yUncertainties < uncertaintyThreshold] = True
 
 def plot_points(coordAmp):
+    """Plots all the individual points in a coordAmp file"""
     xValues = coordAmp.loc[:, 'xPos 1'::8]
     yValues = coordAmp.loc[:, 'yPos 1'::8]
     plt.scatter(xValues, yValues)
@@ -77,6 +83,7 @@ def plot_points(coordAmp):
 
 
 def plot_track(coordAmp, track):
+    """Plots a single track from a coordAmp file"""
     xPositions = coordAmp.loc[track].loc['xPos 1'::8]
     yPositions = coordAmp.loc[track].loc['yPos 1'::8]
     coordinates = zip(xPositions, yPositions)
@@ -88,6 +95,7 @@ def plot_track(coordAmp, track):
 
 
 def plot_all_tracks(coordAmp):
+    """Plots all the tracks from a coordAmp file"""
     for track in range(1, coordAmp.shape[0]):
         xPositions = coordAmp.loc[track].loc['xPos 1'::8]
         yPositions = coordAmp.loc[track].loc['yPos 1'::8]
@@ -98,6 +106,8 @@ def plot_all_tracks(coordAmp):
     plt.show()
 
 def find_average_positions(coordAmp):
+    """Finds the average positions of each track in a coordAmp file and returns
+    them as a list of tuples"""
     averagePositions = []
     for track in range(1, coordAmp.shape[0]):
         xPositions = coordAmp.loc[track].loc['xPos 1'::8]
@@ -106,6 +116,8 @@ def find_average_positions(coordAmp):
     return averagePositions
     
 def find_track_starts(coordAmp):
+    """Finds the beginning positions of each track and returns them as a list 
+    of tuples"""
     trackStarts = []    
     for track in range(1, coordAmp.shape[0]):
         xPositions = coordAmp.loc[track].loc['xPos 1'::8]
@@ -119,6 +131,7 @@ def find_track_starts(coordAmp):
     return trackStarts
         
 def plot_mean_vectors(coordAmp):
+    """Plots the vectors of average motion"""
     tails = find_track_starts(coordAmp)
     heads = find_average_positions(coordAmp)
     tailArray = np.array(tails)    
@@ -136,6 +149,8 @@ def plot_mean_vectors(coordAmp):
     plt.show()
   
 def plot_density_heatmap(coordAmp):
+    """Plots a heatmap of particle density using the average position of the
+    particles"""
     average_pos = find_average_positions(coordAmp)
     xpos,ypos = zip(*average_pos)
     heatmap,xedges,yedges = np.histogram2d(ypos, xpos, bins=25)
