@@ -134,4 +134,10 @@ def plot_mean_vectors(coordAmp):
     ax.set_ylim([180,200])
     plt.draw()
     plt.show()
-    
+  
+def plot_density_heatmap(coordAmp):
+    average_pos = find_average_positions(coordAmp)
+    xpos,ypos = zip(*average_pos)
+    heatmap,xedges,yedges = np.histogram2d(ypos, xpos, bins=25)
+    extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+    plt.imshow(heatmap, extent=extent, origin = 'lower')
