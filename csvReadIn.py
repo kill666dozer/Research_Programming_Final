@@ -12,22 +12,31 @@ from tkinter import filedialog
 
 
 def load_csv():
-    """Prompts the user to find a csv to load in"""
+    """Prompts the user to find a csv to load in as a np array"""
     file_path = filedialog.askopenfilename()
     data = np.loadtxt(open(file_path, "rb"), delimiter=",")
     return data
 
 
-def list_uncertainties(data):
-    """Returns a list of uncertainties mined from a coordAmp dataset"""
-    maxUncertainty = .3
-    uncertainties = []
-    for row in data:
-        for uncertainty in row[4::8]:
-            if uncertainty < maxUncertainty:
-                uncertainties.append(uncertainty)
-    return uncertainties
-
+def create_uncertainties_mask(coordAmp,maxUncertainty = .3):
+    """Returns a mask to be used for cleaning low-precision data"""
+    xUncertainties = coordAmp.loc[:, "xUncertainty 1"::8]
+    yUncertainties = coordAmp.loc[:, "yUncertainty 1"::8]
+    xBools = (xUncertainties<maxUncertainty).values
+    masterBools = xBools
+    yBools = (yUncertainties<maxUncertainty).values
+    #Find the places where the values do not match
+    discrepancies = (xBools!=yBools)
+    # and set them to false on masterBools
+    masterBools[discrepancies]=False
+    # Now reshape the mask to fit the original dataframe
+    masterMask = np.repeat(masterBools,8,1)
+    return masterMask
+    
+def make_cleaned_sigmas(coordAmp):
+    mask = create_uncertainties_mask(coordAmp)
+    coordAmp.values[~mask] = np.nan
+    return coordAmp
 
 def make_coordAmp_dataframe(npArray):
     """Creates a labelled dataframe for the coordAmp dataset"""
@@ -68,11 +77,12 @@ def make_featIndx_dataframe(npArray):
     return infoFrame
 
 
-# def uncertainty_mask(coordAmp, uncertaintyThreshold=.3):
-#    xUncertainties = coordAmp.loc[:, 'xUncertainty 1'::8]
-#    yUncertainties = coordAmp.loc[:, 'yUncertainty 1'::8]
-#    xMask = xUncertainties[xUncertainties < uncertaintyThreshold] = True
-#    yMask = yUncertainties[yUncertainties < uncertaintyThreshold] = True
+def uncertainty_mask(coordAmp, uncertaintyThreshold=.3):
+#    uncertaintyThreshold=.3
+    xUncertainties = coordAmp.loc[:, 'xUncertainty 1'::8]
+    yUncertainties = coordAmp.loc[:, 'yUncertainty 1'::8]
+    xMask = xUncertainties[xUncertainties < uncertaintyThreshold]
+    yMask = yUncertainties[yUncertainties < uncertaintyThreshold]
 
 def plot_points(coordAmp):
     """Plots all the individual points in a coordAmp file"""
