@@ -6,6 +6,7 @@ This is a temporary script file.
 """
 import numpy as np
 import pandas as pd
+from math import pi, atan
 from matplotlib import pyplot as plt
 from matplotlib import colors
 from tkinter import filedialog
@@ -34,9 +35,12 @@ def create_uncertainties_mask(coordAmp,maxUncertainty = .3):
     return masterMask
     
 def make_cleaned_sigmas(coordAmp):
+    """Returns a copy of the input coordAmp dataframe with low-precision data
+       removed"""
     mask = create_uncertainties_mask(coordAmp)
     coordAmp.values[~mask] = np.nan
-    return coordAmp
+    cleanCoordAmp = pd.DataFrame(coordAmp)
+    return cleanCoordAmp
 
 def make_coordAmp_dataframe(npArray):
     """Creates a labelled dataframe for the coordAmp dataset"""
@@ -77,13 +81,6 @@ def make_featIndx_dataframe(npArray):
     return infoFrame
 
 
-def uncertainty_mask(coordAmp, uncertaintyThreshold=.3):
-#    uncertaintyThreshold=.3
-    xUncertainties = coordAmp.loc[:, 'xUncertainty 1'::8]
-    yUncertainties = coordAmp.loc[:, 'yUncertainty 1'::8]
-    xMask = xUncertainties[xUncertainties < uncertaintyThreshold]
-    yMask = yUncertainties[yUncertainties < uncertaintyThreshold]
-
 def plot_points(coordAmp):
     """Plots all the individual points in a coordAmp file"""
     xValues = coordAmp.loc[:, 'xPos 1'::8]
@@ -99,17 +96,12 @@ def plot_track(coordAmp, track):
     coordinates = zip(xPositions, yPositions)
     plt.scatter(xPositions, yPositions)
     plt.plot(xPositions, yPositions)
-#    plt.xlim(0,300)
-#    plt.ylim(0,300)
-#    plt.show()
-
 
 def plot_all_tracks(coordAmp):
     """Plots all the tracks from a coordAmp file"""
     for track in range(1, coordAmp.shape[0]):
         xPositions = coordAmp.loc[track].loc['xPos 1'::8]
         yPositions = coordAmp.loc[track].loc['yPos 1'::8]
-#        plt.scatter(xPositions,yPositions)
         plt.plot(xPositions, yPositions)
 #    plt.xlim(50,80)
 #    plt.ylim(50,80)
@@ -140,6 +132,7 @@ def find_track_starts(coordAmp):
         trackStarts.append((xPositions[frame], yPositions[frame]))
     return trackStarts
         
+        
 def plot_mean_vectors(coordAmp):
     """Plots the vectors of average motion"""
     tails = find_track_starts(coordAmp)
@@ -153,11 +146,49 @@ def plot_mean_vectors(coordAmp):
     ax = plt.gca()
     ax.set_aspect('equal', adjustable='box')
     ax.quiver(x,y,u,v,angles='xy', scale_units='xy', scale=1)
-    ax.set_xlim([60,80])
-    ax.set_ylim([180,200])
+#    ax.set_xlim([60,80])
+#    ax.set_ylim([180,200])
     plt.draw()
     plt.show()
-  
+
+
+def generate_directions(coordinates):
+    directions = []
+    for coordinate in coordinates:
+        direction = atan(coordinate[1]/coordinate[0])
+        if coordinate[0] > 0:
+            if coordinate[1] > 0:
+                pass
+            else:
+                direction = direction + (2*pi)
+        else:
+            direction = direction + pi
+        directions.append(direction)
+    return directions    
+
+
+def plot_vector_direction(coordAmp):
+    """Plots average vector direction as color"""
+    tails = find_track_starts(coordAmp)
+    heads = find_average_positions(coordAmp)
+    tailArray = np.array(tails)    
+    headArray = np.array(heads)
+    vectors = list(headArray - tailArray)
+    x,y = zip(*tails)
+    u,v = zip(*vectors)
+    scaledDirections = np.array(generate_directions(vectors))/(2*pi)
+    plt.figure()
+#    ax = plt.gca()
+#    ax.set_aspect('equal', adjustable='box')
+#    ax.quiver(x,y,u,v,angles='xy', scale_units='xy', scale=1, color=
+#              scaledDirections)
+#    ax.set_xlim([60,80])
+#    ax.set_ylim([180,200])
+    plt.scatter(x,y,c=scaledDirections)
+    plt.draw()
+    plt.show()
+
+
 def plot_density_heatmap(coordAmp):
     """Plots a heatmap of particle density using the average position of the
     particles"""
