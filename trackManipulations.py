@@ -30,7 +30,7 @@ def generate_directions(coordinates):
 
 def find_average_positions(coordAmp):
     """Finds the average positions of each track in a coordAmp file and returns
-    them as a list of tuples"""
+       them as a list of tuples"""
     averagePositions = []
     for track in range(1, coordAmp.shape[0]):
         xPositions = coordAmp.loc[track].loc['xPos 1'::8]
@@ -40,7 +40,7 @@ def find_average_positions(coordAmp):
     
 def find_track_starts(coordAmp):
     """Finds the beginning positions of each track and returns them as a list 
-    of tuples"""
+       of tuples"""
     trackStarts = []    
     for track in range(1, coordAmp.shape[0]):
         xPositions = coordAmp.loc[track].loc['xPos 1'::8]

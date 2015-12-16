@@ -17,6 +17,8 @@ def plot_points(coordAmp):
     xValues = coordAmp.loc[:, 'xPos 1'::8]
     yValues = coordAmp.loc[:, 'yPos 1'::8]
     plt.clf()
+    ax = plt.gca()
+    ax.set_aspect('equal', adjustable='box')
     plt.scatter(xValues, yValues)
     plt.show()
 
@@ -33,6 +35,8 @@ def plot_track(coordAmp, track):
 def plot_all_tracks(coordAmp):
     """Plots all the tracks from a coordAmp file"""
     plt.clf()
+    ax = plt.gca()
+    ax.set_aspect('equal', adjustable='box')
     for track in range(1, coordAmp.shape[0]):
         xPositions = coordAmp.loc[track].loc['xPos 1'::8]
         yPositions = coordAmp.loc[track].loc['yPos 1'::8]
@@ -81,10 +85,12 @@ def plot_vector_direction(coordAmp):
 
 def plot_density_heatmap(coordAmp):
     """Plots a heatmap of particle density using the average position of the
-    particles"""
+       particles"""
     average_pos = trackManipulations.find_average_positions(coordAmp)
     xpos,ypos = zip(*average_pos)
     plt.clf()
+    ax = plt.gca()
+    ax.set_aspect('equal', adjustable='box')
     heatmap,xedges,yedges = np.histogram2d(ypos, xpos, bins=25)
     extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
     plt.imshow(heatmap, extent=extent, origin = 'lower')

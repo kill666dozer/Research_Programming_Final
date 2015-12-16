@@ -31,7 +31,8 @@ def create_uncertainties_mask(coordAmp,maxUncertainty = .3):
     # Now reshape the mask to fit the original dataframe
     masterMask = np.repeat(masterBools,8,1)
     return masterMask
-    
+
+
 def make_cleaned_sigmas(coordAmp):
     """Returns a copy of the input coordAmp dataframe with low-precision data
        removed"""
@@ -40,6 +41,8 @@ def make_cleaned_sigmas(coordAmp):
     coordAmpArray[~mask] = np.nan
     cleanCoordAmp = make_coordAmp_dataframe(coordAmpArray)
     return cleanCoordAmp
+    
+    
 
 def make_coordAmp_dataframe(npArray):
     """Creates a labelled dataframe for the coordAmp dataset"""

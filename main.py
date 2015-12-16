@@ -33,3 +33,6 @@ def main():
     print("Since we have the average position of each particle, we can")
     print("generate a heatmap of density:")
     plottingFunctions.plot_density_heatmap(coordAmp)
+
+if __name__ == '__main__':
+    main()
